@@ -1,0 +1,7 @@
+[
+    {
+        "id": "tab-utility",
+        "name": "Tab utility (create new tab to the right)",
+        "description": "Press the command (Alt+T) to create a new tab immediately to the right; if in a group, the new tab joins the group."
+    }
+]
