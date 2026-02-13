@@ -16,7 +16,7 @@ Chrome Utilities is a lightweight extension that lets you manage a marketplace o
 ## Available Snippets
 
 Currently included:
-- **Tab Utility**: Create new tabs to the right with `Alt+T` (or `Cmd+T` on Mac)
+- **Tab Utility**: Create new tabs immediately to the right with `Alt+T` (or `Cmd+T` on Mac). If you are in a tabs group, the new tab will also be part of the group.
 
 ## Installation
 
