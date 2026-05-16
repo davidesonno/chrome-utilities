@@ -13,11 +13,19 @@
   "permissions": [
     "storage",
     "tabs",
+    "tabGroups",
     "windows",
     "activeTab"
   ],
   "host_permissions": [],
   "commands": {
+    "collapse-tab-group": {
+      "suggested_key": {
+        "windows": "Alt+C",
+        "mac": "Command+Shift+C"
+      },
+      "description": "Collapse the active tab group and move focus to the nearest tab outside it."
+    },
     "detach-current-tab": {
       "suggested_key": {
         "windows": "Alt+N",

@@ -21,6 +21,7 @@ function createSandbox(filePath, collected) {
   const sandboxChrome = {
     commands: { onCommand: { addListener: noop, removeListener: noop } },
     tabs: { query: noop, create: noop, group: noop },
+    tabGroups: { update: noop },
     storage: { sync: { get: noop, set: noop }, onChanged: { addListener: noop } },
     runtime: { onInstalled: { addListener: noop }, getURL: (value) => value },
   };

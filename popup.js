@@ -58,10 +58,27 @@ function renderList(snippets, enabledMap) {
   }
 }
 
+function applyDefaultEnabledState(snippets, enabledMap) {
+  let changed = false;
+  for (const sn of snippets) {
+    if (enabledMap[sn.id] === undefined) {
+      enabledMap[sn.id] = true;
+      changed = true;
+    }
+  }
+
+  return changed;
+}
+
 async function init() {
   const snippets = Array.isArray(window.__SNIPPETS__) ? window.__SNIPPETS__ : [];
   const stored = await chrome.storage.sync.get({ enabledSnippets: {} });
   const enabled = stored.enabledSnippets || {};
+
+  if (applyDefaultEnabledState(snippets, enabled)) {
+    await chrome.storage.sync.set({ enabledSnippets: enabled });
+  }
+
   renderList(snippets, enabled);
 }
 
