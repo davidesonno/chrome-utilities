@@ -1,9 +1,17 @@
 // popup.js: renders the list of snippets and toggles enabled state in chrome.storage.sync
 
-async function fetchSnippets() {
-  const url = chrome.runtime.getURL('snippets/snippets.json');
-  const res = await fetch(url);
-  return await res.json();
+function formatShortcut(suggestedKey) {
+  if (!suggestedKey) return 'Not assigned';
+
+  const platform = navigator.userAgentData?.platform || navigator.platform || '';
+  const isMac = /mac/i.test(platform);
+  const isWindows = /win/i.test(platform);
+
+  if (isMac && suggestedKey.mac) return suggestedKey.mac;
+  if (isWindows && suggestedKey.windows) return suggestedKey.windows;
+  if (suggestedKey.default) return suggestedKey.default;
+
+  return suggestedKey.mac || suggestedKey.windows || suggestedKey.linux || suggestedKey.chromeos || 'Not assigned';
 }
 
 function renderList(snippets, enabledMap) {
@@ -21,6 +29,16 @@ function renderList(snippets, enabledMap) {
     desc.textContent = sn.description || '';
     meta.appendChild(title);
     meta.appendChild(desc);
+
+    const command = document.createElement('p');
+    command.className = 'command';
+    const commandLabel = document.createElement('span');
+    commandLabel.textContent = 'Shortcut';
+    const commandValue = document.createElement('kbd');
+    commandValue.textContent = formatShortcut(sn.command && sn.command.suggested_key);
+    command.appendChild(commandLabel);
+    command.appendChild(commandValue);
+    meta.appendChild(command);
 
     const control = document.createElement('div');
     const checkbox = document.createElement('input');
@@ -41,7 +59,7 @@ function renderList(snippets, enabledMap) {
 }
 
 async function init() {
-  const snippets = await fetchSnippets();
+  const snippets = Array.isArray(window.__SNIPPETS__) ? window.__SNIPPETS__ : [];
   const stored = await chrome.storage.sync.get({ enabledSnippets: {} });
   const enabled = stored.enabledSnippets || {};
   renderList(snippets, enabled);

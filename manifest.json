@@ -1,28 +1,36 @@
 {
-    "name": "Chrome Utilities",
-    "description": "Small collection (market) of small Chrome snippets you can enable/disable from the popup.",
-    "version": "1.0",
-    "manifest_version": 3,
-    "background": {
-        "service_worker": "background.js"
+  "name": "Chrome Utilities",
+  "description": "Small collection (market) of small Chrome snippets you can enable/disable from the popup.",
+  "version": "1.0",
+  "manifest_version": 3,
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Chrome Utilities - open to toggle snippets",
+    "default_popup": "popup.html"
+  },
+  "permissions": [
+    "storage",
+    "tabs",
+    "windows",
+    "activeTab"
+  ],
+  "host_permissions": [],
+  "commands": {
+    "detach-current-tab": {
+      "suggested_key": {
+        "windows": "Alt+N",
+        "mac": "Command+N"
+      },
+      "description": "Detach the active tab into a new maximized window."
     },
-    "action": {
-        "default_title": "Chrome Utilities - open to toggle snippets",
-        "default_popup": "popup.html"
-    },
-    "permissions": [
-        "storage",
-        "tabs",
-        "activeTab"
-    ],
-    "host_permissions": [],
-    "commands": {
-        "add-new-tab": {
-            "suggested_key": {
-                "default": "Alt+T",
-                "mac": "Command+T"
-            },
-            "description": "Create new tab on the right."
-        }
+    "add-new-tab": {
+      "suggested_key": {
+        "windows": "Alt+T",
+        "mac": "Command+T"
+      },
+      "description": "Create a new tab immediately to the right of the active tab."
     }
+  }
 }

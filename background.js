@@ -1,12 +1,21 @@
 // Snippet loader for "Chrome Utilities" extension.
-// Snippets call `registerSnippet({ id, name, description, init, dispose })` on load.
+// Snippets call `registerSnippet({ id, name, description, command, init, dispose })` on load.
 
 const snippets = {};
+const commandHandlers = {};
 
 function registerSnippet(meta) {
   if (!meta || !meta.id) return;
-  snippets[meta.id] = Object.assign({ active: false }, meta);
-  // keep metadata small and serializable
+  const normalized = Object.assign({ active: false }, meta);
+  snippets[normalized.id] = normalized;
+
+  const command = normalized.command;
+  if (command && command.id && typeof command.run === 'function') {
+    commandHandlers[command.id] = {
+      snippetId: normalized.id,
+      run: command.run,
+    };
+  }
 }
 
 // expose globally so snippet files can call it when imported
@@ -40,18 +49,42 @@ async function syncActivateAll() {
   const stored = await chrome.storage.sync.get({ enabledSnippets: {} });
   const enabled = stored.enabledSnippets || {};
   for (const id of Object.keys(snippets)) {
+    if (enabled[id] === undefined) {
+      enabled[id] = true;
+    }
+
     if (enabled[id]) await activateSnippet(id);
     else await deactivateSnippet(id);
+  }
+
+  await chrome.storage.sync.set({ enabledSnippets: enabled });
+}
+
+async function handleCommand(commandId) {
+  const handler = commandHandlers[commandId];
+  if (!handler) return;
+
+  const stored = await chrome.storage.sync.get({ enabledSnippets: {} });
+  const enabled = stored.enabledSnippets || {};
+  if (!enabled[handler.snippetId]) return;
+
+  try {
+    await handler.run();
+  } catch (err) {
+    console.error('Error running command', commandId, err);
   }
 }
 
 // Import snippet files. Each snippet file should call registerSnippet(...) when executed.
 try {
-  importScripts('snippets/tab-utility.js');
-  // future snippets: importScripts('snippets/another-snippet.js');
+  importScripts('generated/generated-loader.js');
 } catch (err) {
   console.warn('Failed to import snippet files:', err);
 }
+
+chrome.commands.onCommand.addListener((commandId) => {
+  handleCommand(commandId);
+});
 
 // Initialize: ensure enabled snippets become active.
 syncActivateAll();
@@ -74,12 +107,19 @@ chrome.storage.onChanged.addListener((changes, area) => {
   }
 });
 
-// On install, ensure there's a default enabled snippet map (enable tab-utility by default)
+// On install, ensure there's a default enabled snippet map.
 chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.sync.get({ enabledSnippets: {} }, (res) => {
     const enabled = res.enabledSnippets || {};
-    if (enabled['tab-utility'] === undefined) {
-      enabled['tab-utility'] = true;
+    let changed = false;
+    for (const id of Object.keys(snippets)) {
+      if (enabled[id] === undefined) {
+        enabled[id] = true;
+        changed = true;
+      }
+    }
+
+    if (changed) {
       chrome.storage.sync.set({ enabledSnippets: enabled });
     }
   });
